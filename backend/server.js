@@ -25,26 +25,6 @@ app.get('/', (req, res) => {
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/tracks', require('./routes/tracks'));
 app.use('/api/users', require('./routes/users'));
-app.use((req, res) => {
-  console.warn(`⚠️ 404 - Route not found: ${req.originalUrl}`);
-  res.status(404).json({ error: 'Route not found', path: req.originalUrl });
-});
 
-// Error handler
-app.use((err, req, res, next) => {
-  console.error('🔥 Server Error:', err);
-  res.status(500).json({ error: 'Internal Server Error', message: err.message });
-});
-
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`
-====================================
-🚀 Purple Player Server Started
-🌐 PORT: ${PORT}
-📦 MongoDB: ${process.env.MONGODB_URI ? 'Configured' : 'Not Set'}
-====================================
-  `);
-});
 const PORT = process.env.PORT||4000;
 app.listen(PORT, ()=>console.log('🎵 Purple Player server running on port', PORT));
