@@ -2,6 +2,17 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 
+const API_KEY = import.meta.env.VITE_API_KEY || 'purple-secret-key-samra-2025';
+
+// Helper to add API key to headers
+function getHeaders(additionalHeaders = {}) {
+  return {
+    'Content-Type': 'application/json',
+    'x-api-key': API_KEY,
+    ...additionalHeaders
+  };
+}
+
 export default function Home() {
   const { user, logout } = useUser();
   const [stats, setStats] = useState({ songs: 0, messages: 0 });
@@ -13,7 +24,8 @@ export default function Home() {
     async function loadStats() {
       try {
         const response = await fetch(
-          import.meta.env.VITE_API_URL + "/api/tracks"
+          import.meta.env.VITE_API_URL + "/api/tracks",
+          { headers: getHeaders() }
         );
         if (response.ok) {
           const tracks = await response.json();
@@ -43,7 +55,8 @@ export default function Home() {
   async function loadOnlineUsers() {
     try {
       const response = await fetch(
-        import.meta.env.VITE_API_URL + `/api/users/online`
+        import.meta.env.VITE_API_URL + `/api/users/online`,
+        { headers: getHeaders() }
       );
       if (response.ok) {
         const users = await response.json();
@@ -59,7 +72,8 @@ export default function Home() {
     async function loadTopSong() {
       try {
         const response = await fetch(
-          import.meta.env.VITE_API_URL + "/api/tracks/top-song"
+          import.meta.env.VITE_API_URL + "/api/tracks/top-song",
+          { headers: getHeaders() }
         );
         if (response.ok) {
           const song = await response.json();

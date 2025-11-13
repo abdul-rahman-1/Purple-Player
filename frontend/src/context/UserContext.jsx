@@ -1,6 +1,16 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const UserContext = createContext();
+const API_KEY = import.meta.env.VITE_API_KEY || 'purple-secret-key-samra-2025';
+
+// Helper to add API key to headers
+function getHeaders(additionalHeaders = {}) {
+  return {
+    'Content-Type': 'application/json',
+    'x-api-key': API_KEY,
+    ...additionalHeaders
+  };
+}
 
 export function UserProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -29,6 +39,7 @@ export function UserProvider({ children }) {
         try {
           await fetch(import.meta.env.VITE_API_URL+`/api/users/offline/${user._id}`, {
             method: 'PUT',
+            headers: getHeaders(),
             keepalive: true // Important for unload
           });
         } catch (err) {
@@ -45,7 +56,8 @@ export function UserProvider({ children }) {
     try {
       if (userId) {
         await fetch(import.meta.env.VITE_API_URL+`/api/users/heartbeat/${userId}`, {
-          method: 'POST'
+          method: 'POST',
+          headers: getHeaders()
         });
       }
     } catch (err) {
@@ -57,9 +69,8 @@ export function UserProvider({ children }) {
     try {
       const sessionId = generateSessionId();
       const response = await fetch(import.meta.env.VITE_API_URL + '/api/users/register', {
-
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify({ name, email, sessionId })
       });
 
@@ -84,7 +95,7 @@ export function UserProvider({ children }) {
     try {
       const response = await fetch(import.meta.env.VITE_API_URL+`/api/users/listening/${user._id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify({ songTitle, songArtist })
       });
       const updated = await response.json();
@@ -113,7 +124,8 @@ export function UserProvider({ children }) {
     if (user) {
       try {
         await fetch(import.meta.env.VITE_API_URL+`/api/users/offline/${user._id}`, {
-          method: 'PUT'
+          method: 'PUT',
+          headers: getHeaders()
         });
       } catch (err) {
         console.error('Logout error:', err);

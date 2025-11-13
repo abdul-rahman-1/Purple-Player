@@ -1,9 +1,23 @@
 const API = (import.meta.env.VITE_API_URL) + '/api';
+const API_KEY = import.meta.env.VITE_API_KEY || 'purple-secret-key-samra-2025';
+
 console.log('🌐 Using API base URL:', API);
+console.log('🔑 API Key configured:', API_KEY ? '✅ Yes' : '❌ No');
+
+// Helper to add API key to headers
+function getHeaders(additionalHeaders = {}) {
+  return {
+    'Content-Type': 'application/json',
+    'x-api-key': API_KEY,
+    ...additionalHeaders
+  };
+}
 
 export async function fetchTracks(){ 
   try {
-    const r = await fetch(API + '/tracks'); 
+    const r = await fetch(API + '/tracks', {
+      headers: getHeaders()
+    }); 
     if (!r.ok) throw new Error(`Server error: ${r.status}`);
     return await r.json(); 
   } catch (err) {
@@ -17,7 +31,7 @@ export async function addTrack(payload){
     console.log('📤 POST /tracks with payload:', payload);
     const r = await fetch(API+'/tracks',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers: getHeaders(),
       body:JSON.stringify(payload)
     }); 
     
@@ -41,7 +55,7 @@ export async function deleteTrack(trackId, userId){
     console.log('🗑️ DELETE /tracks/:id for trackId:', trackId);
     const r = await fetch(API+'/tracks/'+trackId,{
       method:'DELETE',
-      headers:{'Content-Type':'application/json'},
+      headers: getHeaders(),
       body:JSON.stringify({userId})
     }); 
     
