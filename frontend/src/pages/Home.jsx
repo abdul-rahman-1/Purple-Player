@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useUser } from '../context/UserContext';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 
 export default function Home() {
   const { user, logout } = useUser();
@@ -12,22 +12,26 @@ export default function Home() {
     // Load stats from backend (actual count from database)
     async function loadStats() {
       try {
-        const response = await fetch('http://localhost:4000/api/tracks');
+        const response = await fetch(
+          import.meta.env.VITE_API_URL + "/api/tracks"
+        );
         if (response.ok) {
           const tracks = await response.json();
-          const msgCount = tracks.filter(t => t.message && t.message.trim()).length;
+          const msgCount = tracks.filter(
+            (t) => t.message && t.message.trim()
+          ).length;
           setStats({
             songs: tracks.length,
-            messages: msgCount
+            messages: msgCount,
           });
         }
       } catch (err) {
-        console.error('Failed to load stats:', err);
+        console.error("Failed to load stats:", err);
       }
     }
 
     loadStats();
-    
+
     // Fetch online users from backend
     loadOnlineUsers();
 
@@ -38,13 +42,15 @@ export default function Home() {
 
   async function loadOnlineUsers() {
     try {
-      const response = await fetch('http://localhost:4000/api/users/online');
+      const response = await fetch(
+        import.meta.env.VITE_API_URL + `/api/users/online`
+      );
       if (response.ok) {
         const users = await response.json();
         setOnlineUsers(users);
       }
     } catch (err) {
-      console.error('Failed to load online users:', err);
+      console.error("Failed to load online users:", err);
     }
   }
 
@@ -52,20 +58,22 @@ export default function Home() {
   useEffect(() => {
     async function loadTopSong() {
       try {
-        const response = await fetch('http://localhost:4000/api/tracks/top-song');
+        const response = await fetch(
+          import.meta.env.VITE_API_URL + "/api/tracks/top-song"
+        );
         if (response.ok) {
           const song = await response.json();
           if (song) {
             setTopSong({
-              title: song.title || 'Unknown',
-              artist: song.artist || 'Unknown',
+              title: song.title || "Unknown",
+              artist: song.artist || "Unknown",
               plays: 1,
-              duration: '...'
+              duration: "...",
             });
           }
         }
       } catch (err) {
-        console.error('Failed to load top song:', err);
+        console.error("Failed to load top song:", err);
       }
     }
     loadTopSong();
@@ -90,6 +98,66 @@ export default function Home() {
             )}
           </div>
         </header>
+        {/* Footer Section */}
+        <footer className="home-footer row my-5 footer-bg">
+          <div
+            className="col-md-3"
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <img
+              style={{ width: "100%", borderRadius: "15px" }}
+              src="/logo.png"
+              alt="Purple Player Logo"
+            />
+          </div>
+          <div className="footer-content col-md-9">
+            <h3>About Purple Player</h3>
+            <p>
+              A Friendly, ad-free music-sharing app where every song tells a
+              story. A digital love letter where you and someone special can
+              share your favorite songs with personal messages.
+            </p>
+
+            <div className="footer-creators text-center">
+              <h4>Made by</h4>
+              <p>
+                <a
+                  href="https://github.com/abdul-rahman-1"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="creator-link"
+                >
+                  Abdul Rahman
+                </a>{" "}
+                for his purple 💜
+              </p>
+              <p>
+                <a
+                  href="https://github.com/1-Samra-Khan"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="creator-link"
+                >
+                  Samra Khan
+                </a>
+              </p>
+            </div>
+
+            <div className="footer-tech text-center">
+              <p>
+                Built with React + Vite (Frontend) • Express + MongoDB (Backend)
+              </p>
+              <p>
+                YouTube-based music sharing • No Ads • No Distractions • Just
+                Music & Love 💜
+              </p>
+            </div>
+          </div>
+        </footer>
 
         {/* Stats Grid */}
         <section className="stats-grid">
@@ -117,12 +185,17 @@ export default function Home() {
 
         {/* Now Playing */}
         {topSong && (
-          <section className="now-playing">
-            <h2>🏆 Most Played</h2>
-            <div className="song-card-featured">
+          <section className="now-playing row"
+          style={{display:"flex",justifyContent:"center"}}>
+            <h2 className="col-md-12">🏆 Most Played</h2>
+            <div className="song-card-featured col-md-6">
               <div className="song-artwork">🎵</div>
               <div className="song-info">
-                <h3>{topSong.title}</h3>
+                <h3>
+                  {topSong.title.length > 25
+                    ? topSong.title.slice(0, 25) + "..."
+                    : topSong.title}
+                </h3>
                 <p>{topSong.artist}</p>
                 <div className="song-meta">
                   <span>♥️ {topSong.plays} plays</span>
@@ -135,7 +208,9 @@ export default function Home() {
 
         {/* Online Status */}
         <section className="online-section">
-          <h2>👥 Who's Here ({onlineUsers.filter(u => u.isOnline).length})</h2>
+          <h2>
+            👥 Who's Here ({onlineUsers.filter((u) => u.isOnline).length})
+          </h2>
           {onlineUsers.length === 0 ? (
             <div className="no-users">
               <p>No one is here right now, but you can still add songs! 💜</p>
@@ -143,16 +218,27 @@ export default function Home() {
           ) : (
             <div className="online-users">
               {onlineUsers.map((user, idx) => (
-                <div key={idx} className={`user-card ${user.isOnline ? 'online' : 'offline'}`}>
+                <div
+                  key={idx}
+                  className={`user-card ${
+                    user.isOnline ? "online" : "offline"
+                  }`}
+                >
                   <div className="user-avatar">
                     {user.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="user-info">
                     <h3>{user.name}</h3>
                     <div className="user-status">
-                      <span className={`status-dot ${user.isOnline ? 'online' : 'offline'}`}></span>
+                      <span
+                        className={`status-dot ${
+                          user.isOnline ? "online" : "offline"
+                        }`}
+                      ></span>
                       <span className="status-text">
-                        {user.isOnline ? 'Online Now' : `Offline ${getTimeAgo(user.lastSeen)}`}
+                        {user.isOnline
+                          ? "Online Now"
+                          : `Offline ${getTimeAgo(user.lastSeen)}`}
                       </span>
                     </div>
                     {user.currentlyListening && user.isOnline && (
@@ -161,7 +247,9 @@ export default function Home() {
                       </div>
                     )}
                     <p className="last-visit">
-                      {user.isOnline ? 'Active now' : `Last seen ${getTimeAgo(user.lastSeen)}`}
+                      {user.isOnline
+                        ? "Active now"
+                        : `Last seen ${getTimeAgo(user.lastSeen)}`}
                     </p>
                   </div>
                 </div>
@@ -185,9 +273,9 @@ export default function Home() {
 }
 
 function getTimeAgo(date) {
-  if (!date) return 'recently';
+  if (!date) return "recently";
   const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-  if (seconds < 60) return 'just now';
+  if (seconds < 60) return "just now";
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `${minutes}m`;
   const hours = Math.floor(minutes / 60);

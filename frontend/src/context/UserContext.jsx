@@ -27,7 +27,7 @@ export function UserProvider({ children }) {
       if (user) {
         // Send offline signal immediately
         try {
-          await fetch(`http://localhost:4000/api/users/offline/${user._id}`, {
+          await fetch(import.meta.env.VITE_API_URL+`/api/users/offline/${user._id}`, {
             method: 'PUT',
             keepalive: true // Important for unload
           });
@@ -44,7 +44,7 @@ export function UserProvider({ children }) {
   async function heartbeat(userId) {
     try {
       if (userId) {
-        await fetch(`http://localhost:4000/api/users/heartbeat/${userId}`, {
+        await fetch(import.meta.env.VITE_API_URL+`/api/users/heartbeat/${userId}`, {
           method: 'POST'
         });
       }
@@ -56,7 +56,8 @@ export function UserProvider({ children }) {
   async function registerUser(name, email) {
     try {
       const sessionId = generateSessionId();
-      const response = await fetch('http://localhost:4000/api/users/register', {
+      const response = await fetch(import.meta.env.VITE_API_URL + '/api/users/register', {
+
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, sessionId })
@@ -81,7 +82,7 @@ export function UserProvider({ children }) {
   async function updateListeningStatus(songTitle, songArtist) {
     if (!user) return;
     try {
-      const response = await fetch(`http://localhost:4000/api/users/listening/${user._id}`, {
+      const response = await fetch(import.meta.env.VITE_API_URL+`/api/users/listening/${user._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ songTitle, songArtist })
@@ -111,7 +112,7 @@ export function UserProvider({ children }) {
   async function logout() {
     if (user) {
       try {
-        await fetch(`http://localhost:4000/api/users/offline/${user._id}`, {
+        await fetch(import.meta.env.VITE_API_URL+`/api/users/offline/${user._id}`, {
           method: 'PUT'
         });
       } catch (err) {
