@@ -65,13 +65,13 @@ export function UserProvider({ children }) {
     }
   }
 
-  async function registerUser(name, email) {
+  async function registerUser(name, email, avatar = null) {
     try {
       const sessionId = generateSessionId();
       const response = await fetch(import.meta.env.VITE_API_URL + '/api/users/register', {
         method: 'POST',
         headers: getHeaders(),
-        body: JSON.stringify({ name, email, sessionId })
+        body: JSON.stringify({ name, email, sessionId, avatar })
       });
 
       if (!response.ok) throw new Error('Registration failed');

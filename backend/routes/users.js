@@ -6,7 +6,7 @@ const router = express.Router();
 // Register/Get or Create User
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, sessionId } = req.body;
+    const { name, email, sessionId, avatar } = req.body;
 
     if (!name || !email) {
       return res.status(400).json({ error: 'Name and email required' });
@@ -15,16 +15,20 @@ router.post('/register', async (req, res) => {
     let user = await User.findOne({ email });
 
     if (user) {
-      // User exists - update session
+      // User exists - update session and avatar if provided
       user.sessionId = sessionId || uuidv4();
       user.isOnline = true;
       user.lastSeen = new Date();
+      if (avatar) {
+        user.avatar = avatar;
+      }
       await user.save();
     } else {
       // Create new user
       user = new User({
         name,
         email,
+        avatar: avatar || null,
         sessionId: sessionId || uuidv4(),
         isOnline: true,
         lastSeen: new Date()
