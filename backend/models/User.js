@@ -4,6 +4,7 @@ const UserSchema = new mongoose.Schema({
   email: { type: String, unique: true },
   passwordHash: String,
   sessionId: { type: String, unique: true, sparse: true },
+  avatar: { type: String, default: null }, // base64 image string
   isOnline: { type: Boolean, default: false },
   lastSeen: { type: Date, default: Date.now },
   currentlyListening: { type: String, default: null },

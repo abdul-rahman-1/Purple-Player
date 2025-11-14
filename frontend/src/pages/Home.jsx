@@ -239,7 +239,11 @@ export default function Home() {
                   }`}
                 >
                   <div className="user-avatar">
-                    {user.name.charAt(0).toUpperCase()}
+                    {user.avatar ? (
+                      <img src={user.avatar} alt={user.name} className="avatar-image" />
+                    ) : (
+                      user.name.charAt(0).toUpperCase()
+                    )}
                   </div>
                   <div className="user-info">
                     <h3>{user.name}</h3>

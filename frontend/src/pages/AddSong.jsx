@@ -214,7 +214,7 @@ export default function AddSong() {
               <div className="preview-label">🎵 Preview</div>
               <div className="preview-player">
                 <iframe
-                  src={preview.url}
+                  src={preview.url+ "&vq=tiny"}
                   title="YouTube preview"
                   frameBorder="0"
                   allow="autoplay; encrypted-media"

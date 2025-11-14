@@ -36,6 +36,7 @@ router.post('/register', async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      avatar: user.avatar,
       sessionId: user.sessionId,
       isOnline: user.isOnline
     });
@@ -56,7 +57,7 @@ router.get('/online', async (req, res) => {
     );
 
     // Get all users (both online and offline)
-    const users = await User.find().select('name email currentlyListening lastSeen isOnline').sort({ lastSeen: -1 });
+    const users = await User.find().select('name email avatar currentlyListening lastSeen isOnline').sort({ lastSeen: -1 });
     res.json(users);
   } catch (err) {
     console.error('Online users error:', err);
@@ -102,7 +103,7 @@ router.put('/offline/:userId', async (req, res) => {
 // Get user activity status
 router.get('/status/:email', async (req, res) => {
   try {
-    const user = await User.findOne({ email: req.params.email }).select('name email isOnline currentlyListening lastSeen lastListenedSong');
+    const user = await User.findOne({ email: req.params.email }).select('name email avatar isOnline currentlyListening lastSeen lastListenedSong');
     if (!user) {
       return res.json({ isOnline: false, lastSeen: null });
     }
