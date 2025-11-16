@@ -130,7 +130,10 @@ router.post('/login', async (req, res) => {
 
 // ============ GROUP MANAGEMENT ============
 
-// Step 3a: Generate unique group code for user
+// Step 3a: Generate unique group code for user (DEPRECATED - Use /join-group with createNew instead)
+// This endpoint is deprecated because it only creates a user.groupCode field but doesn't create a Group document.
+// When another user tries to join with this code, Group.findOne() returns null causing "Invalid group code" error.
+// Frontend should use POST /join-group/:userId with { createNew: true, groupName: "..." } instead.
 router.post('/generate-group-code/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
@@ -140,24 +143,24 @@ router.post('/generate-group-code/:userId', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Generate new unique group code
-    let groupCode;
-    let isUnique = false;
-    while (!isUnique) {
-      groupCode = generateGroupCode();
-      const existing = await User.findOne({ groupCode });
-      if (!existing) {
-        isUnique = true;
-      }
+    // Check if user already in a group
+    if (user.groupId) {
+      return res.status(400).json({ error: 'You are already in a group. Leave first.' });
     }
 
-    user.isGroupMode = true;
-    user.groupCode = groupCode;
-    await user.save();
-
-    res.json({
-      groupCode: groupCode,
-      message: 'Group code generated successfully'
+    // Return deprecation warning with instructions
+    return res.status(410).json({ 
+      error: 'Endpoint deprecated',
+      message: 'Please use POST /api/users/join-group/:userId with createNew=true instead',
+      example: {
+        method: 'POST',
+        url: `/api/users/join-group/${userId}`,
+        body: {
+          createNew: true,
+          groupName: 'My Group Name'
+        }
+      },
+      reason: 'This endpoint did not create a Group document, causing join failures'
     });
   } catch (err) {
     console.error('Generate code error:', err);
@@ -302,51 +305,18 @@ router.post('/join-group/:userId', async (req, res) => {
   }
 });
 
-// Leave group
-router.post('/leave-group/:userId', async (req, res) => {
-  try {
-    const { userId } = req.params;
+// DEPRECATED ENDPOINTS - These use obsolete fields (groupMemberId, groupCode)
+// These endpoints are kept for backwards compatibility but should not be used.
+// Use the proper Group model endpoints below instead.
 
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    // If user has a partner, update partner too
-    if (user.groupMemberId) {
-      const partner = await User.findById(user.groupMemberId);
-      if (partner) {
-        partner.isGroupMode = false;
-        partner.groupMemberId = null;
-        await partner.save();
-      }
-    }
-
-    // Update current user
-    user.isGroupMode = false;
-    user.groupMemberId = null;
-    user.groupCode = null;
-    await user.save();
-
-    res.json({ message: 'Successfully left group' });
-  } catch (err) {
-    console.error('Leave group error:', err);
-    res.status(500).json({ error: 'Failed to leave group' });
-  }
-});
-
-// Get group partner info
+// Get group partner info (DEPRECATED - Use GET /group/members/:userId instead)
 router.get('/group-partner/:userId', async (req, res) => {
   try {
-    const { userId } = req.params;
-
-    const user = await User.findById(userId);
-    if (!user || !user.groupMemberId) {
-      return res.status(404).json({ error: 'Not in a group' });
-    }
-
-    const partner = await User.findById(user.groupMemberId).select('_id name email avatar isOnline lastSeen');
-    res.json(partner);
+    return res.status(410).json({ 
+      error: 'Endpoint deprecated',
+      message: 'Please use GET /api/users/group/members/:userId instead',
+      reason: 'This endpoint uses obsolete groupMemberId field. Use Group model instead.'
+    });
   } catch (err) {
     console.error('Get partner error:', err);
     res.status(500).json({ error: 'Failed to get partner info' });
@@ -531,22 +501,25 @@ router.get('/group/info/:groupId', async (req, res) => {
       return res.status(404).json({ error: 'Group not found' });
     }
 
-    const members = group.members.map(m => ({
-      userId: m.userId._id,
-      name: m.userId.name,
-      email: m.userId.email,
-      avatar: m.userId.avatar,
-      isOnline: m.userId.isOnline,
-      role: m.role,
-      joinedAt: m.joinedAt
-    }));
+    // Filter out null refs before mapping (in case a user was deleted)
+    const members = group.members
+      .filter(m => m.userId) // ✅ Skip null/undefined userId references
+      .map(m => ({
+        userId: m.userId._id,
+        name: m.userId.name,
+        email: m.userId.email,
+        avatar: m.userId.avatar,
+        isOnline: m.userId.isOnline,
+        role: m.role,
+        joinedAt: m.joinedAt
+      }));
 
     res.json({
       groupId: group._id,
       groupName: group.groupName,
       groupCode: group.groupCode,
       members: members,
-      totalMembers: group.members.length,
+      totalMembers: members.length, // Use filtered count
       totalSongs: group.totalSongs,
       totalMessages: group.totalMessages,
       createdAt: group.createdAt
