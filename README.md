@@ -158,20 +158,6 @@ npm install
 npm run dev  # Runs on port 5174
 ```
 
-### Environment Variables
-
-**Backend (.env)**
-```
-MONGO_URI=mongodb+srv://user:pass@cluster.mongodb.net/purple-player
-PORT=4000
-```
-
-**Frontend (.env)**
-```
-VITE_API_URL=http://localhost:4000
-VITE_API_KEY=purple-secret-key-samra-2025
-```
-
 ---
 
 ## 🎮 Usage
